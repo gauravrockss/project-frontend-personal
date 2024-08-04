@@ -9,6 +9,7 @@ import {
     TextField,
     Tooltip,
     Typography,
+    Modal,
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
@@ -16,8 +17,6 @@ import { Draggable } from 'react-beautiful-dnd';
 import ExpandCircleDownOutlinedIcon from '@mui/icons-material/ExpandCircleDownOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
-import { Form, Submit, useForm } from '../../../hooks/useForm';
-import { Input } from '../../../hooks/useForm/inputs';
 import { handleAxiosError } from '../../../utilities/function';
 import { useMessage } from '../../../providers/Provider';
 import Image from '../../../components/Image'; // Ensure this component exists and is correctly imported
@@ -25,6 +24,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IssueType, Priority } from '../../../services/stickerColor';
 import axiosInstance from '../../../utilities/axios';
 import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+import CreateIssues from './CreateIssues';
 
 const BoardColumns = props => {
     const {
@@ -32,16 +32,13 @@ const BoardColumns = props => {
         title,
         members,
         issues,
-        openIssueModal,
+
         fetchMoreIssue,
-        totalIssueList,
-        users,
         loadMoreLoading,
         currentPage,
         issueList,
     } = props;
 
-    console.log(issueList);
     const user = useAuthUser();
     const [searchParams, setSearchParams] = useSearchParams();
     const [projectState, setProjectState] = useState(false);
@@ -50,17 +47,19 @@ const BoardColumns = props => {
     const [issueId, setIssueId] = useState(null);
     const [issueName, setIssueName] = useState('');
     const ProjectId = localStorage.getItem('selectedProject');
-    const issueState = Boolean(searchParams.get('issues'));
+
     const { showError, showSuccess } = useMessage();
-    const handlers = useForm(
-        useMemo(
-            () => ({
-                name: { required: true, value: '' },
-            }),
-            []
-        ),
-        { Input: TextField }
-    );
+
+    const openProject = t => {
+        setProjectState(true);
+        // setDeafultStatus(t);
+    };
+
+    const openIssueModal = id => {
+        // const issue = issueList.find(issue => issue.id === id);
+        // setSelectedIssue(issue);
+        setProjectState(true);
+    };
     const closeProject = () => setProjectState(false);
 
     const onSubmit = async e => {
@@ -165,7 +164,10 @@ const BoardColumns = props => {
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
                                           {...provided.dragHandleProps}>
-                                          <IssueCard issue={issue} />
+                                          <IssueCard
+                                              issue={issue}
+                                              openIssueModal={openIssueModal}
+                                          />
                                       </div>
                                   )}
                               </Draggable>
@@ -332,13 +334,32 @@ const BoardColumns = props => {
                     </form>
                 </Box>
             </Card>
+            <Modal
+                sx={{
+                    overflowY: 'scroll',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+                open={projectState}
+                onClose={closeProject}>
+                <>
+                    <CreateIssues
+                    // taskId={issueId}
+                    // projectId={ProjectId}
+                    // closeModal={closeProject}
+                    // fetchIssues={fetchIssues}
+                    // users={users}
+                    />
+                </>
+            </Modal>
         </Box>
     );
 };
 
 export default BoardColumns;
 
-const IssueCard = ({ issue }) => {
+const IssueCard = ({ issue, openIssueModal }) => {
     return (
         <Box
             sx={{
@@ -346,7 +367,7 @@ const IssueCard = ({ issue }) => {
                 margin: 0,
             }}>
             <Card
-                // onClick={() => openIssueModal(id)}
+                onClick={() => openIssueModal(issue.id)}
                 sx={{
                     cursor: 'pointer',
                     border: '1px solid',
