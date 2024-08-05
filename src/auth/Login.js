@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -17,7 +17,6 @@ import useSignIn from 'react-auth-kit/hooks/useSignIn';
 import { Link, useNavigate } from 'react-router-dom';
 import useErrorHandler from '../hooks/useErrorHandler';
 import axios from 'axios';
-import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
 
 const Login = () => {
     const googleLogin = useGoogleLogin({
