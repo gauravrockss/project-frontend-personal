@@ -65,6 +65,22 @@ const Index = () => {
             priority: 'High',
             issueType: 'Task',
         },
+        {
+            status: 'Completed',
+            name: 'Complete the project design',
+            projectName: 'Projects',
+            key: 'CP123',
+            priority: 'High',
+            issueType: 'Task',
+        },
+        {
+            status: 'Completed',
+            name: 'Complete the project design',
+            projectName: 'Projects',
+            key: 'CP123',
+            priority: 'Medium',
+            issueType: 'Bug',
+        },
     ];
     const activityData = [
         {
@@ -78,6 +94,24 @@ const Index = () => {
             description: 'This is a demo Activity',
             fullName: 'CP123',
             type: 'comment',
+        },
+        {
+            status: 'Completed',
+            description: 'This is a demo Activity',
+            fullName: 'CP123',
+            type: 'organization',
+        },
+        {
+            status: 'Completed',
+            description: 'This is a demo Activity',
+            fullName: 'CP123',
+            type: 'member',
+        },
+        {
+            status: 'Completed',
+            description: 'This is a demo Activity',
+            fullName: 'CP123',
+            type: 'project',
         },
     ];
 

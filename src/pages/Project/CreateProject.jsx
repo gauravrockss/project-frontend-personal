@@ -17,15 +17,12 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Image from '../../components/Image';
-import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
-import { projectsImg } from '../../services/stickerColor';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utilities/axios';
 import { useMessage } from '../../providers/Provider';
 import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 
-const CreateProject = () => {
-    const { id: projectId } = useParams();
+const CreateProject = ({ projectId }) => {
     const navigate = useNavigate();
     const { showSuccess, showError } = useMessage();
     const user = useAuthUser() || {};
@@ -37,21 +34,21 @@ const CreateProject = () => {
 
     const buttonText = projectId ? 'Save' : 'Create';
     const method = projectId ? 'PATCH' : 'POST';
-    const action = projectId ? `/api/projects//${projectId}` : `/api/projects/`;
+    const action = projectId ? `/api/projects/${projectId}/` : `/api/projects/`;
     const successMessage = projectId
         ? 'Project updated successfully'
         : 'Project created successfully';
 
     const fetchProject = useCallback(async () => {
         try {
-            const response = await axios.get(
-                `/organization/project/${projectId}`
+            const response = await axiosInstance.get(
+                `/api/projects/${projectId}/`
             );
-            const { project, success, errors } = response.data;
+            const { data, success, errors } = response.data;
             if (!success) return showError(errors);
 
-            setName(project.name);
-            setKey(project.key);
+            setName(data.name);
+            setKey(data.key);
         } catch (e) {
             showError(e.message);
         }
@@ -60,8 +57,8 @@ const CreateProject = () => {
     const handleDelete = useCallback(async () => {
         setDeleteLoading(true);
         try {
-            const response = await axios.delete(
-                `/organization/project/${projectId}`
+            const response = await axiosInstance.delete(
+                `/api/projects/${projectId}/`
             );
             const { success, message } = response.data;
 
@@ -131,6 +128,33 @@ const CreateProject = () => {
                         </Grid>
                     </Box>
                 )}
+                {projectId && (
+                    <Box sx={{ ml: 2, textAlign: 'right' }}>
+                        <IconButton
+                            onClick={() => setConfirmDeleteDialogOpen(true)}>
+                            <MoreVertIcon fontSize='small' />
+                        </IconButton>
+                        <Menu
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(confirmDeleteDialogOpen)}
+                            onClose={() => setConfirmDeleteDialogOpen(false)}>
+                            <MenuItem
+                                onClick={() =>
+                                    setConfirmDeleteDialogOpen(true)
+                                }>
+                                Delete
+                            </MenuItem>
+                        </Menu>
+                    </Box>
+                )}
+
                 <Box mt={4}>
                     <Box sx={{ textAlign: 'center' }}>
                         <Image
@@ -190,28 +214,6 @@ const CreateProject = () => {
                     </form>
                 </Box>
             </Box>
-
-            {projectId && (
-                <Box sx={{ ml: 2 }}>
-                    <IconButton
-                        onClick={() => setConfirmDeleteDialogOpen(true)}>
-                        <MoreVertIcon fontSize='small' />
-                    </IconButton>
-                    <Menu
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
-                        }}
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        open={Boolean(confirmDeleteDialogOpen)}
-                        onClose={() => setConfirmDeleteDialogOpen(false)}>
-                        <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                    </Menu>
-                </Box>
-            )}
 
             <Dialog
                 open={confirmDeleteDialogOpen}

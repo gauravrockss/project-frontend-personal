@@ -6,7 +6,13 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 
 import TableRow from '@mui/material/TableRow';
-import { Avatar, AvatarGroup, Box, LinearProgress, Typography } from '@mui/material';
+import {
+    Avatar,
+    AvatarGroup,
+    Box,
+    LinearProgress,
+    Typography,
+} from '@mui/material';
 
 const columns = [
     { id: 'Task', label: 'Task', minWidth: 100 },
@@ -53,7 +59,9 @@ const TaskSummary = () => {
                                     style={{
                                         minWidth: column.minWidth,
                                     }}>
-                                    <Typography variant='caption'>{column.label}</Typography>
+                                    <Typography variant='caption'>
+                                        {column.label}
+                                    </Typography>
                                 </TableCell>
                             ))}
                         </TableRow>
@@ -77,7 +85,9 @@ const TaskSummary = () => {
                                     </TableCell>
                                     <TableCell component='th' scope='row'>
                                         <Box sx={{ width: '100%' }}>
-                                            <LinearProgressWithLabel value={70} />
+                                            <LinearProgressWithLabel
+                                                value={70}
+                                            />
                                         </Box>
                                     </TableCell>
                                     <TableCell component='th' scope='row'>
@@ -137,7 +147,9 @@ function LinearProgressWithLabel(props) {
                 <Typography
                     variant='body2'
                     color='text.secondary'
-                    sx={{ color: 'lightGreen.dark' }}>{`${Math.round(props.value)}%`}</Typography>
+                    sx={{ color: 'lightGreen.dark' }}>{`${Math.round(
+                    props.value
+                )}%`}</Typography>
             </Box>
         </Box>
     );

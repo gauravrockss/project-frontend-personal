@@ -11,7 +11,7 @@ import {
     Typography,
     Modal,
 } from '@mui/material';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { Draggable } from 'react-beautiful-dnd';
 import ExpandCircleDownOutlinedIcon from '@mui/icons-material/ExpandCircleDownOutlined';
@@ -20,19 +20,18 @@ import CheckIcon from '@mui/icons-material/Check';
 import { handleAxiosError } from '../../../utilities/function';
 import { useMessage } from '../../../providers/Provider';
 import Image from '../../../components/Image'; // Ensure this component exists and is correctly imported
-import { useSearchParams } from 'react-router-dom';
 import { IssueType, Priority } from '../../../services/stickerColor';
 import axiosInstance from '../../../utilities/axios';
 import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 import CreateIssues from './CreateIssues';
+import IssueSkeleton from './createIssueSkeleton';
 
 const BoardColumns = props => {
     const {
         fetchIssues,
         title,
-        members,
         issues,
-
+        members,
         fetchMoreIssue,
         loadMoreLoading,
         currentPage,
@@ -40,24 +39,21 @@ const BoardColumns = props => {
     } = props;
 
     const user = useAuthUser();
-    const [searchParams, setSearchParams] = useSearchParams();
+
     const [projectState, setProjectState] = useState(false);
     const [createIssueState, setCreateIssueState] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [issueId, setIssueId] = useState(null);
+    const [selectedIssue, setSelectedIssue] = useState(null);
+    const [task, setTask] = useState(null);
     const [issueName, setIssueName] = useState('');
     const ProjectId = localStorage.getItem('selectedProject');
 
     const { showError, showSuccess } = useMessage();
 
-    const openProject = t => {
-        setProjectState(true);
-        // setDeafultStatus(t);
-    };
-
     const openIssueModal = id => {
         // const issue = issueList.find(issue => issue.id === id);
-        // setSelectedIssue(issue);
+        setSelectedIssue(id);
+
         setProjectState(true);
     };
     const closeProject = () => setProjectState(false);
@@ -73,7 +69,6 @@ const BoardColumns = props => {
                     name: issueName,
                     status: title,
                     reporter: user.id,
-                    start_date: new Date().toISOString().split('T')[0],
                 }
             );
 
@@ -89,6 +84,25 @@ const BoardColumns = props => {
             setLoading(false);
         }
     };
+
+    const fetchSelectedIssue = useCallback(
+        async function () {
+            try {
+                const response = await axiosInstance.get(
+                    `/api/projects/${ProjectId}/issues/${selectedIssue}/`
+                );
+
+                setTask(response.data.data);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        [setTask, selectedIssue, ProjectId]
+    );
+
+    useEffect(() => {
+        selectedIssue && fetchSelectedIssue();
+    }, [fetchSelectedIssue, selectedIssue]);
 
     return (
         <Box height='100%'>
@@ -344,13 +358,19 @@ const BoardColumns = props => {
                 open={projectState}
                 onClose={closeProject}>
                 <>
-                    <CreateIssues
-                    // taskId={issueId}
-                    // projectId={ProjectId}
-                    // closeModal={closeProject}
-                    // fetchIssues={fetchIssues}
-                    // users={users}
-                    />
+                    {task ? (
+                        <CreateIssues
+                            members={members}
+                            task={task}
+                            closeProject={closeProject}
+                            selectedIssue={selectedIssue}
+                            ProjectId={ProjectId}
+                            setProjectState={setProjectState}
+                            fetchIssues={fetchIssues}
+                        />
+                    ) : (
+                        <IssueSkeleton />
+                    )}
                 </>
             </Modal>
         </Box>

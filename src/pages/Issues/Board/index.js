@@ -1,21 +1,17 @@
 import {
     Grid,
-    Modal,
     FormControl,
     MenuItem,
     Stack,
     Box,
     Typography,
-    CircularProgress,
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import BoardColumns from './BoardColumns';
-import { useParams, useSearchParams } from 'react-router-dom';
 import { Select } from '../../../components/Select';
 import Search from '../../../components/Search';
 import { useMessage } from '../../../providers/Provider';
-import { useProjectId } from '../../../providers/ProjectProvider';
 import axiosInstance from '../../../utilities/axios';
 
 const statuses = ['Backlog', 'To Do', 'In Progress', 'Review', 'Done'];
@@ -23,14 +19,11 @@ const priorities = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
 const types = ['Task', 'Bug'];
 
 const Index = props => {
-    const { members } = props;
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [openIssue, setOpenIssue] = useState(
-        Boolean(searchParams.get('issues'))
-    );
+    const [members, setMembers] = useState(null);
+
     const [issueList, setIssueList] = useState({});
     const projectId = localStorage.getItem('selectedProject');
-    const { showError } = useMessage();
+    const { showError, showSuccess } = useMessage();
     const [query, setQuery] = useState({
         assignee: '',
         priority: '',
@@ -54,17 +47,35 @@ const Index = props => {
         )
             return;
 
-        const updatedIssues = Array.from(issueList[source.droppableId]);
-        const [movedIssue] = updatedIssues.splice(source.index, 1);
-        movedIssue.status = destination.droppableId;
-        issueList[destination.droppableId].splice(
-            destination.index,
-            0,
-            movedIssue
-        );
+        const sourceColumn = Array.from(issueList[source.droppableId]);
+        const destColumn = Array.from(issueList[destination.droppableId]);
 
-        setIssueList({ ...issueList });
-        // UpdateIssues(destination.droppableId, movedIssue._id); // Uncomment this to update the backend
+        const [movedIssue] = sourceColumn.splice(source.index, 1);
+        movedIssue.status = destination.droppableId;
+        destColumn.splice(destination.index, 0, movedIssue);
+
+        setIssueList({
+            ...issueList,
+            [source.droppableId]: sourceColumn,
+            [destination.droppableId]: destColumn,
+        });
+
+        // Uncomment and modify the following line to update the backend
+        updateIssueStatus(movedIssue.id, destination.droppableId);
+    };
+
+    const updateIssueStatus = async (issueId, newStatus) => {
+        try {
+            await axiosInstance.patch(
+                `/api/projects/${projectId}/issues/${issueId}/`,
+                {
+                    status: newStatus,
+                }
+            );
+            showSuccess('Issue update successfully');
+        } catch (e) {
+            console.error('Failed to update issue status', e);
+        }
     };
 
     const fetchIssues = useCallback(async () => {
@@ -82,18 +93,43 @@ const Index = props => {
                 issuesList[issue.status].push(issue);
             }
 
-            console.log(issueList);
             setIssueList(issuesList);
-            console.log(issueList);
         } catch (e) {
             console.log(e);
             showError('Failed to fetch issues');
         }
     }, [setIssueList, projectId, showError]);
 
+    const fetchUsers = useCallback(
+        async function () {
+            try {
+                const response = await axiosInstance.get(`/user/users/`);
+
+                setMembers({});
+
+                const members = response.data;
+
+                const formatMembers = {};
+
+                members.forEach(member => (formatMembers[member.id] = member));
+
+                setMembers(formatMembers);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        [setMembers]
+    );
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
+
     useEffect(() => {
         fetchIssues();
     }, [fetchIssues]);
+
+    console.log(members);
 
     return (
         <Box>
@@ -116,34 +152,6 @@ const Index = props => {
                     spacing={2}
                     mb={1}
                     justifyContent='space-between'>
-                    <FormControl size='small'>
-                        <Select
-                            sx={{
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                fontWeight: 500,
-                                cursor: 'pointer',
-                                paddingTop: '0px',
-                                paddingBottom: '0px',
-                                width: '100%',
-                            }}
-                            value={query.assignee}
-                            name='assignee'
-                            displayEmpty
-                            onChange={handleChangeQuery}
-                            filter={members[query.assignee]?.fullName}
-                            clear={() => setQuery({ ...query, assignee: '' })}
-                            renderValue={v => {
-                                if (!query.assignee) return 'Assignee';
-                                return members[v]?.fullName;
-                            }}>
-                            {Object.keys(members).map(member => (
-                                <MenuItem key={member} value={member}>
-                                    {members[member]?.fullName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
                     <FormControl size='small'>
                         <Select
                             sx={{
@@ -238,6 +246,7 @@ const Index = props => {
                                             {...provided.droppableProps}
                                             style={{ height: '100%' }}>
                                             <BoardColumns
+                                                members={members}
                                                 issueList={
                                                     issueList[status] || []
                                                 }

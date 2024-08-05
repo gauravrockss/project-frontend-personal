@@ -6,7 +6,6 @@ import {
     CardContent,
     Container,
     Grid,
-    IconButton,
     Tooltip,
     Typography,
     CircularProgress,
@@ -15,8 +14,7 @@ import {
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import Image from '../../components/Image';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utilities/axios';
 import AddIcon from '@mui/icons-material/Add';
 import { useChnagePeojectId } from '../../providers/ProjectProvider';

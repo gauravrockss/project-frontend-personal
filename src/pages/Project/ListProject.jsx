@@ -20,7 +20,12 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import Image from '../../components/Image';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import {
+    Link,
+    useNavigate,
+    useLocation,
+    useSearchParams,
+} from 'react-router-dom';
 import axiosInstance from '../../utilities/axios';
 import AddIcon from '@mui/icons-material/Add';
 import { useMessage } from '../../providers/Provider';
@@ -28,13 +33,17 @@ import { useMessage } from '../../providers/Provider';
 const ListProject = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const setSearchParams = useSearchParams()[1];
     const [projects, setProjects] = useState([]);
     const { showSuccess, showError } = useMessage();
     const [anchorElSettings, setAnchorElSettings] = React.useState(null);
     const [openConfirmDeleteDialog, setOpenConfirmDeleteDialog] =
         useState(false);
+    const [openSwitchProjectDialog, setOpenSwitchProjectDialog] =
+        useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [targetProject, setTargetProject] = useState(null);
 
     // Extract projectId from URL
     const query = new URLSearchParams(location.search);
@@ -80,9 +89,19 @@ const ListProject = () => {
                 projects.filter(project => project.id !== selectedProject)
             );
 
+            // Check if the deleted project was the currently selected one
+            if (Number(projectId) === selectedProject) {
+                // Clear the selected project from localStorage and URL
+                localStorage.removeItem('selectedProject');
+                setSearchParams({}, { replace: true });
+
+                // Navigate to the project selection page
+                navigate('/project-selection');
+            }
+
             showSuccess('Project deleted successfully');
         } catch (e) {
-            console.error('Error deleting project:', e);
+            showError('Error deleting project:', e);
         } finally {
             setOpenConfirmDeleteDialog(false);
             setAnchorElSettings(null);
@@ -91,6 +110,32 @@ const ListProject = () => {
 
     const handleDeleteClose = () => {
         setOpenConfirmDeleteDialog(false);
+    };
+
+    const handleSwitchProject = project => {
+        if (project.id !== Number(projectId)) {
+            setTargetProject(project);
+            setOpenSwitchProjectDialog(true);
+        }
+    };
+
+    const handleConfirmSwitch = () => {
+        if (targetProject) {
+            const newProjectId = targetProject.id;
+            setSearchParams(
+                params => {
+                    params.set('projectId', newProjectId);
+                    return params;
+                },
+                { replace: true }
+            );
+            localStorage.setItem('selectedProject', newProjectId);
+            window.location.reload();
+        }
+    };
+
+    const handleCloseSwitchDialog = () => {
+        setOpenSwitchProjectDialog(false);
     };
 
     return (
@@ -140,12 +185,21 @@ const ListProject = () => {
                                                     : '',
                                             '&:hover': {
                                                 backgroundColor:
-                                                    'custom.cardHover',
+                                                    project.id ===
+                                                    Number(projectId)
+                                                        ? 'custom.selectedCard'
+                                                        : 'custom.cardHover',
                                             },
                                         }}
-                                        onClick={() =>
-                                            navigate(`/view-project`)
-                                        }>
+                                        onClick={() => {
+                                            if (
+                                                project.id === Number(projectId)
+                                            ) {
+                                                navigate('/view-project');
+                                            } else {
+                                                handleSwitchProject(project);
+                                            }
+                                        }}>
                                         <Box
                                             sx={{
                                                 backgroundImage:
@@ -253,6 +307,29 @@ const ListProject = () => {
                                 onClick={handleDeleteConfirm}
                                 color='secondary'>
                                 Delete
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    {/* Confirm Switch Project Dialog */}
+                    <Dialog
+                        open={openSwitchProjectDialog}
+                        onClose={handleCloseSwitchDialog}>
+                        <DialogTitle>Switch Project</DialogTitle>
+                        <DialogContent>
+                            Are you sure you want to switch to the project "
+                            {targetProject?.name}"?
+                        </DialogContent>
+                        <DialogActions>
+                            <Button
+                                onClick={handleCloseSwitchDialog}
+                                color='primary'>
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleConfirmSwitch}
+                                color='secondary'>
+                                Switch
                             </Button>
                         </DialogActions>
                     </Dialog>

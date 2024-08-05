@@ -13,7 +13,6 @@ import {
     Typography,
 } from '@mui/material';
 
-import { useParams } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Image from '../../components/Image';
 // import List from './List';
@@ -51,8 +50,8 @@ const Index = () => {
             type: 'comment',
         },
     ];
-    const projectId = useParams().id;
 
+    const projectId = localStorage.getItem('selectedProject');
     const [tabSelected, setTabSelected] = useState(0);
     const [project] = useState(projectData);
     const [members] = useState({});
@@ -159,16 +158,14 @@ const Index = () => {
                     <Tabs value={tabSelected} onChange={tabHandleChange}>
                         {/* <Tab label='Summary' sx={{ px: 0 }} /> */}
                         <Tab label='Board' />
-                        <Tab label='List' />
+                        {/* <Tab label='List' /> */}
                         <Tab label='Project settings' />
                     </Tabs>
                 </Box>
             </Box>
-
             {/* <TabPanel value={tabSelected} index={0}>
                 <Summary />
             </TabPanel> */}
-
             <TabPanel value={tabSelected} index={0}>
                 <Board
                     members={members}
@@ -177,11 +174,10 @@ const Index = () => {
                     memberCurrentPage={memberCurrentPage}
                 />
             </TabPanel>
-
-            <TabPanel value={tabSelected} index={1}>
+            {/* <TabPanel value={tabSelected} index={1}>
                 {/* <List members={members} /> */}
-            </TabPanel>
-            <TabPanel value={tabSelected} index={2}>
+            {/* </TabPanel>  */}
+            <TabPanel value={tabSelected} index={1}>
                 <Box
                     sx={{
                         height: 'calc(100vh - 215px)',

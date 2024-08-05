@@ -16,11 +16,7 @@ const fileManager = [
         icon: <AssignmentOutlinedIcon fontSize='small' />,
         to: '/list-project',
     },
-    // {
-    //     name: 'Your Work',
-    //     icon: <WorkOutlineOutlinedIcon fontSize='small' />,
-    //     to: '/your-work',
-    // },
+
     // {
     //     name: 'Trash',
     //     icon: <DeleteOutlinedIcon fontSize='small' />,
@@ -29,6 +25,11 @@ const fileManager = [
 ];
 
 const yourWork = [
+    {
+        name: 'Your Work',
+        icon: <WorkOutlineOutlinedIcon fontSize='small' />,
+        to: '/your-work',
+    },
     // {
     //     name: 'Team',
     //     icon: <PeopleIcon fontSize='small' />,

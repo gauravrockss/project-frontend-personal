@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import CreateProject from './pages/Project/CreateProject';
 import ListProject from './pages/Project/ListProject';
 import Issues from './pages/Issues';
+import Work from './pages/Work';
 import Login from './auth/Login';
 import Signup from './auth/Signup';
 import Provider from './providers/Provider';
@@ -31,6 +32,7 @@ const App = () => {
                     <Route path='/list-project' element={<ListProject />} />
                     <Route path='/create_project' element={<CreateProject />} />
                     <Route path='/view-project' element={<Issues />} />
+                    <Route path='/your-work' element={<Work />} />
                 </Route>
             </Routes>
         </Provider>

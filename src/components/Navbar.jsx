@@ -47,7 +47,6 @@ import { useMenu } from '../hooks/useMenu';
 import EditIcon from '@mui/icons-material/Edit';
 import SearchBar from './SearchBar';
 import useModal from './../hooks/useModal';
-import { clearCookie } from '../utilities/cookies';
 import Feedback from './Feedback';
 import MicrophoneIcon from './MicrophoneIcon';
 import Setting from './Setting';
@@ -437,6 +436,8 @@ export default function Navbar(props) {
         </Box>
     );
 
+    if (!isAuthenticated) return children;
+
     return (
         <Box
             sx={{
@@ -529,11 +530,9 @@ export default function Navbar(props) {
                                     />
                                 </Menu>
 
-                                <Link to='http://apps.clikkle.com/'>
-                                    <IconButton>
-                                        <AppsIcon />
-                                    </IconButton>
-                                </Link>
+                                <IconButton>
+                                    <AppsIcon />
+                                </IconButton>
                             </Stack>
                         </Grid>
                         <Grid item>
@@ -797,6 +796,7 @@ export default function Navbar(props) {
                             label={menu.name}
                             to={menu.to}
                             icon={menu.icon}
+                            key={menu.to}
                         />
                     ))}
                 </BottomNavigation>
