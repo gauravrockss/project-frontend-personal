@@ -1,6 +1,5 @@
 import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 // import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import PeopleIcon from '@mui/icons-material/People';
 // import PersonIcon from '@mui/icons-material/Person';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import HomeIcon from '@mui/icons-material/HomeOutlined';
